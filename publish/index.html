@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grab Dat Foo! — Oconee Water Data</title>
+<style>
+  :root {
+    --bg: #050a14;
+    --panel: #0a1220;
+    --panel2: #0d1626;
+    --edge: #1b2c4a;
+    --blue: #2e9fff;
+    --blue-glow: rgba(46,159,255,.55);
+    --cyan: #52d8ff;
+    --green: #58f542;
+    --green-dim: #3fd12e;
+    --text: #cfe3ff;
+    --dim: #7d93b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(1200px 600px at 50% -10%, #0c1a33 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+    display: flex; justify-content: center;
+  }
+  .phone {
+    width: 100%; max-width: 480px;
+    padding: 18px 14px 90px;
+  }
+
+  /* ---------- header ---------- */
+  .title {
+    text-align: center; margin: 4px 0 2px;
+    font-size: 44px; font-weight: 900; font-style: italic;
+    letter-spacing: 1px; line-height: .95;
+    background: linear-gradient(180deg, #ffffff 15%, #9fc6ff 45%, #3d7dd6 75%, #dceaff 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 22px rgba(80,150,255,.25);
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,.7));
+  }
+  .tagline {
+    text-align: center; color: var(--green);
+    font-size: 12.5px; font-weight: 700; letter-spacing: 1.5px;
+    margin: 10px 0 18px; text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(88,245,66,.5);
+  }
+  .tagline .row1 { color: var(--cyan); display: block; margin-bottom: 3px; text-shadow: 0 0 10px rgba(82,216,255,.5); }
+
+  /* ---------- big button ---------- */
+  .grab-wrap { padding: 4px; margin-bottom: 22px; }
+  .grab {
+    width: 100%; cursor: pointer; border: none;
+    border-radius: 18px; padding: 22px 16px;
+    background: linear-gradient(180deg, #1747a0 0%, #0f2f73 45%, #123a8c 100%);
+    box-shadow:
+      0 0 0 3px #0a1a3a,
+      0 0 0 5px #2e6fd0,
+      0 0 28px var(--blue-glow),
+      inset 0 0 24px rgba(80,160,255,.5),
+      inset 0 2px 0 rgba(255,255,255,.25);
+    color: #eaf4ff; transition: transform .08s ease, box-shadow .2s ease;
+  }
+  .grab:hover { box-shadow: 0 0 0 3px #0a1a3a, 0 0 0 5px #4d8ce6, 0 0 42px var(--blue-glow), inset 0 0 30px rgba(100,175,255,.6), inset 0 2px 0 rgba(255,255,255,.25); }
+  .grab:active { transform: scale(.985); }
+  .grab:disabled { opacity: .7; cursor: wait; }
+  .grab .big { font-size: 26px; font-weight: 900; font-style: italic; letter-spacing: 1px; text-shadow: 0 0 12px rgba(140,200,255,.9); }
+  .grab .sub { font-size: 12px; letter-spacing: 2.5px; color: #a8cdfb; margin-top: 5px; text-transform: uppercase; }
+
+  /* ---------- section banners ---------- */
+  .banner {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin: 6px 0 12px;
+  }
+  .banner .label {
+    border: 1px solid var(--edge); border-radius: 10px;
+    background: linear-gradient(180deg, #0e1a30, #0a1322);
+    padding: 7px 18px; font-weight: 800; letter-spacing: 1.5px;
+    color: var(--green); font-size: 14px;
+    text-shadow: 0 0 10px rgba(88,245,66,.45);
+    box-shadow: 0 0 12px rgba(88,245,66,.12), inset 0 0 10px rgba(88,245,66,.05);
+  }
+  .banner .tick { color: var(--green); font-weight: 900; opacity: .8; }
+
+  /* ---------- yesterday cards ---------- */
+  .cards3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+  .card {
+    background: linear-gradient(180deg, var(--panel2), var(--panel));
+    border: 1px solid var(--edge); border-radius: 14px;
+    padding: 14px 8px 12px; text-align: center;
+    box-shadow: 0 0 14px rgba(30,80,160,.15), inset 0 1px 0 rgba(120,170,255,.08);
+  }
+  .card h3 { font-size: 12px; letter-spacing: 1px; color: var(--text); font-weight: 700; }
+  .card .icon { font-size: 26px; margin: 10px 0 8px; filter: drop-shadow(0 0 8px rgba(82,216,255,.7)); }
+  .card .val {
+    font-size: 26px; font-weight: 900; color: var(--green);
+    text-shadow: 0 0 14px rgba(88,245,66,.55);
+    min-height: 32px;
+  }
+  .card .unit { font-size: 12px; font-weight: 800; color: #b9d4f5; letter-spacing: 1px; margin-top: 1px; }
+  .card .src { font-size: 9.5px; color: var(--dim); margin-top: 9px; line-height: 1.5; }
+
+  /* ---------- lake cards ---------- */
+  .cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .lake {
+    background: linear-gradient(180deg, var(--panel2), var(--panel));
+    border: 1px solid var(--edge); border-radius: 14px;
+    padding: 14px 12px 12px; text-align: center;
+    box-shadow: 0 0 14px rgba(30,80,160,.15), inset 0 1px 0 rgba(120,170,255,.08);
+  }
+  .lake h3 { font-size: 13px; letter-spacing: 1px; color: var(--cyan); font-weight: 800; text-shadow: 0 0 8px rgba(82,216,255,.4); }
+  .lake .val {
+    font-size: 34px; font-weight: 900; color: var(--blue);
+    text-shadow: 0 0 18px rgba(46,159,255,.65); margin-top: 10px;
+    min-height: 40px;
+  }
+  .lake .unit { font-size: 13px; font-weight: 800; color: #b9d4f5; letter-spacing: 2px; }
+  .lake .pool { font-size: 10.5px; color: var(--dim); margin-top: 8px; }
+  .lake .chg { font-size: 10.5px; color: var(--dim); margin-top: 3px; }
+  .badge {
+    display: inline-block; margin-top: 9px; padding: 4px 12px;
+    border-radius: 7px; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    border: 1px solid #274a1f; color: var(--green); background: #0c1a10;
+    text-shadow: 0 0 8px rgba(88,245,66,.5);
+  }
+  .badge.low  { border-color: #5a4a15; color: #ffd84d; background: #1a1608; text-shadow: 0 0 8px rgba(255,216,77,.5); }
+  .badge.high { border-color: #5a1f1f; color: #ff6b5e; background: #1a0b0a; text-shadow: 0 0 8px rgba(255,107,94,.5); }
+
+  /* ---------- footer / status ---------- */
+  .foot {
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid var(--edge); border-radius: 12px;
+    background: linear-gradient(180deg, #0b1424, #08101d);
+    padding: 12px 14px; font-size: 11px; color: var(--dim);
+  }
+  .foot b { color: var(--text); font-size: 12px; display: block; margin-bottom: 2px; }
+  .foot .right { text-align: right; }
+  #updated { color: var(--green); }
+  .err { color: #ff8d80; font-size: 11px; text-align: center; margin: -12px 0 14px; min-height: 0; }
+
+  /* ---------- history ---------- */
+  #history { margin-bottom: 20px; display: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { padding: 7px 6px; text-align: right; border-bottom: 1px solid #14203a; }
+  th { color: var(--cyan); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  td:first-child, th:first-child { text-align: left; color: var(--dim); }
+  td { color: var(--text); font-weight: 600; }
+
+  /* ---------- bottom nav ---------- */
+  .nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 8px;
+    background: linear-gradient(180deg, rgba(6,12,24,.6), #060c18 40%);
+    padding: 10px 12px 14px; backdrop-filter: blur(6px);
+  }
+  .nav button {
+    flex: 0 1 110px; cursor: pointer;
+    background: linear-gradient(180deg, #0e1a30, #0a1322);
+    border: 1px solid var(--edge); border-radius: 12px;
+    color: var(--dim); font-size: 12px; font-weight: 700;
+    padding: 10px 0; letter-spacing: .5px;
+  }
+  .nav button.active { color: var(--blue); border-color: #2e5fa8; box-shadow: 0 0 12px rgba(46,159,255,.25), inset 0 0 10px rgba(46,159,255,.08); }
+  .spin { display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <h1 class="title">Grab<br>Dat Foo!</h1>
+  <div class="tagline">
+    <span class="row1">Yesterday's Discharge, Feet &amp; Precip</span>
+    Today's Lake Levels
+  </div>
+
+  <div class="grab-wrap">
+    <button class="grab" id="grabBtn" onclick="grabDatFoo()">
+      <div class="big">&#9729;&#65039;&#8681; GRAB DAT FOO!</div>
+      <div class="sub">Pull the latest water data</div>
+    </button>
+  </div>
+  <div class="err" id="errBox"></div>
+
+  <div class="banner"><span class="tick">--</span><span class="label">YESTERDAY'S DATA <span id="ydate"></span></span><span class="tick">--</span></div>
+  <div class="cards3">
+    <div class="card">
+      <h3>DISCHARGE</h3>
+      <div class="icon">&#128688;</div>
+      <div class="val" id="discharge">--</div>
+      <div class="unit">CFS</div>
+      <div class="src" id="dischargeSrc">USGS 02223000<br>Daily Mean</div>
+    </div>
+    <div class="card">
+      <h3>FEET</h3>
+      <div class="icon">&#127754;</div>
+      <div class="val" id="feet">--</div>
+      <div class="unit">FT</div>
+      <div class="src">USGS 02223000<br>Gage Height, Daily Mean</div>
+    </div>
+    <div class="card">
+      <h3>PRECIPITATION</h3>
+      <div class="icon">&#127783;&#65039;</div>
+      <div class="val" id="precip">--</div>
+      <div class="unit">IN</div>
+      <div class="src" id="precipSrc">24 HR Total</div>
+    </div>
+  </div>
+
+  <div class="banner"><span class="tick">--</span><span class="label">TODAY'S LAKE LEVELS</span><span class="tick">--</span></div>
+  <div class="cards2">
+    <div class="lake">
+      <h3>LAKE OCONEE</h3>
+      <div class="val" id="oconee">--</div>
+      <div class="unit">FT</div>
+      <div class="pool">Full Pool: 435.0 ft</div>
+      <div class="chg" id="oconeeChg"></div>
+      <div class="badge" id="oconeeBadge">WAITING...</div>
+    </div>
+    <div class="lake">
+      <h3>LAKE SINCLAIR</h3>
+      <div class="val" id="sinclair">--</div>
+      <div class="unit">FT</div>
+      <div class="pool">Full Pool: 340.0 ft</div>
+      <div class="chg" id="sinclairChg"></div>
+      <div class="badge" id="sinclairBadge">WAITING...</div>
+    </div>
+  </div>
+
+  <div id="history">
+    <div class="banner"><span class="tick">--</span><span class="label">LAST 7 DAYS &mdash; OCONEE RIVER</span><span class="tick">--</span></div>
+    <table>
+      <thead><tr><th>Date</th><th>Discharge (CFS)</th><th>Feet</th><th>Precip (in)</th></tr></thead>
+      <tbody id="histBody"><tr><td colspan="4">Grab dat foo first!</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="foot">
+    <div>
+      <b>&#128205; Georgia, USA</b>
+      Data: USGS &amp; NWS (FFC / Georgia Power)
+    </div>
+    <div class="right">
+      <b>&#128336; Updated</b>
+      <span id="updated">never</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button id="tabHome" class="active" onclick="showTab('home')">&#127968; Home</button>
+  <button id="tabHistory" onclick="showTab('history')">&#128197; History</button>
+  <button onclick="window.open('https://waterdata.usgs.gov/monitoring-location/USGS-02223000/','_blank')">&#128506;&#65039; USGS Map</button>
+</div>
+
+<script>
+const RIVER_SITE = "02223000";                 // Oconee River at Milledgeville
+const PRECIP_FALLBACK = "02220900";            // Little River near Eatonton (nearest working rain gauge)
+const FULL_POOL = { oconee: 435.0, sinclair: 340.0 };
+
+const $ = id => document.getElementById(id);
+
+function yesterdayStr() {
+  // Site-local date (Eastern). USGS DV dates are in the site's local time.
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+  now.setDate(now.getDate() - 1);
+  const p = n => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`;
+}
+
+function fmt(num, decimals) {
+  const n = Number(num);
+  return isNaN(n) ? "--" : n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+/* ---------------- USGS: yesterday's discharge, feet, precip + 7-day history ---------------- */
+async function fetchRiver() {
+  const url = `https://waterservices.usgs.gov/nwis/dv/?format=json&sites=${RIVER_SITE},${PRECIP_FALLBACK}&period=P8D&parameterCd=00060,00065,00045`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`USGS HTTP ${r.status}`);
+  const data = await r.json();
+
+  // series[siteId][param] = { "YYYY-MM-DD": value }
+  const series = {};
+  for (const ts of data.value.timeSeries) {
+    const site = ts.sourceInfo.siteCode[0].value;
+    const param = ts.variable.variableCode[0].value;
+    const noData = String(ts.variable.noDataValue);
+    for (const block of ts.values) {
+      for (const v of block.value) {
+        if (v.value === noData || v.value === "-999999") continue;
+        series[site] = series[site] || {};
+        series[site][param] = series[site][param] || {};
+        series[site][param][v.dateTime.substring(0, 10)] = v.value;
+      }
+    }
+  }
+
+  const y = yesterdayStr();
+  const river = series[RIVER_SITE] || {};
+
+  // Discharge — yesterday's daily mean, else latest available
+  const dis = pickDay(river["00060"], y);
+  $("discharge").textContent = dis ? fmt(dis.val, 0) : "N/A";
+  $("dischargeSrc").innerHTML = dis
+    ? `USGS ${RIVER_SITE}<br>Daily Mean &bull; ${dis.date}${dis.date !== y ? " (latest)" : ""}<br>&asymp; ${fmt(dis.val * 0.646317, 1)} MGD`
+    : `USGS ${RIVER_SITE}<br>no data`;
+
+  // Gage height (feet)
+  const ft = pickDay(river["00065"], y);
+  $("feet").textContent = ft ? fmt(ft.val, 2) : "N/A";
+
+  // Precip — prefer the Milledgeville gauge, fall back to Eatonton
+  let pr = pickDay(river["00045"], y), prSite = RIVER_SITE, prName = "Milledgeville";
+  if (!pr) { pr = pickDay((series[PRECIP_FALLBACK] || {})["00045"], y); prSite = PRECIP_FALLBACK; prName = "Little R. nr Eatonton"; }
+  $("precip").textContent = pr ? fmt(pr.val, 2) : "N/A";
+  $("precipSrc").innerHTML = pr ? `USGS ${prSite} (${prName})<br>24 HR Total &bull; ${pr.date}` : "no gauge reporting";
+
+  buildHistory(river, series[PRECIP_FALLBACK] || {});
+}
+
+function pickDay(byDate, day) {
+  if (!byDate) return null;
+  if (byDate[day] !== undefined) return { date: day, val: byDate[day] };
+  const dates = Object.keys(byDate).sort();
+  if (!dates.length) return null;
+  const last = dates[dates.length - 1];
+  return { date: last, val: byDate[last] };
+}
+
+function buildHistory(river, fallbackSite) {
+  const dates = new Set();
+  for (const p of ["00060", "00065"]) for (const d in (river[p] || {})) dates.add(d);
+  const rows = [...dates].sort().reverse().slice(0, 7).map(d => {
+    const q = river["00060"]?.[d], h = river["00065"]?.[d];
+    const p = river["00045"]?.[d] ?? fallbackSite["00045"]?.[d];
+    return `<tr><td>${d}</td><td>${q !== undefined ? fmt(q, 0) : "--"}</td><td>${h !== undefined ? fmt(h, 2) : "--"}</td><td>${p !== undefined ? fmt(p, 2) : "--"}</td></tr>`;
+  });
+  $("histBody").innerHTML = rows.length ? rows.join("") : '<tr><td colspan="4">no data</td></tr>';
+}
+
+/* ---------------- NWS FFC: today's lake levels (Georgia Power RR5 report) ---------------- */
+async function fetchLakes() {
+  const list = await (await fetch("https://api.weather.gov/products/types/RR5/locations/FFC")).json();
+  const products = list["@graph"] || [];
+
+  // newest RR5 that contains the Georgia Power reservoir lines
+  for (const p of products.slice(0, 12)) {
+    const prod = await (await fetch(p["@id"])).json();
+    const txt = prod.productText || "";
+    const oconee = txt.match(/^WDMG1\s+([\d.]+)/m);
+    const sinclair = txt.match(/^SNCG1\s+([\d.]+)/m);
+    if (oconee && sinclair) {
+      setLake("oconee", parseFloat(oconee[1]), FULL_POOL.oconee);
+      setLake("sinclair", parseFloat(sinclair[1]), FULL_POOL.sinclair);
+      const t = new Date(prod.issuanceTime);
+      const stamp = t.toLocaleString("en-US", { timeZone: "America/New_York", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
+      $("oconeeChg").textContent = `Georgia Power reading ${stamp} ET`;
+      $("sinclairChg").textContent = `Georgia Power reading ${stamp} ET`;
+      return;
+    }
+  }
+  throw new Error("No Georgia Power lake data found in recent NWS FFC reports");
+}
+
+function setLake(id, level, full) {
+  $(id).textContent = fmt(level, 2);
+  const diff = level - full;
+  const badge = $(id + "Badge");
+  if (diff > 0.5)        { badge.textContent = "HIGH POOL";   badge.className = "badge high"; }
+  else if (diff >= -2.0) { badge.textContent = "NORMAL POOL"; badge.className = "badge"; }
+  else                   { badge.textContent = "LOW POOL";    badge.className = "badge low"; }
+}
+
+/* ---------------- main ---------------- */
+async function grabDatFoo() {
+  const btn = $("grabBtn");
+  btn.disabled = true;
+  btn.querySelector(".big").innerHTML = '<span class="spin">&#128260;</span> GRABBIN&rsquo; DAT FOO...';
+  $("errBox").textContent = "";
+  $("ydate").textContent = `(${yesterdayStr()})`;
+
+  const results = await Promise.allSettled([fetchRiver(), fetchLakes()]);
+  const errs = results.filter(r => r.status === "rejected").map(r => r.reason.message);
+  if (errs.length) $("errBox").textContent = "⚠️ " + errs.join(" | ");
+
+  $("updated").textContent = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  btn.disabled = false;
+  btn.querySelector(".big").innerHTML = "&#9729;&#65039;&#8681; GRAB DAT FOO!";
+}
+
+function showTab(which) {
+  $("history").style.display = which === "history" ? "block" : "none";
+  $("tabHome").classList.toggle("active", which === "home");
+  $("tabHistory").classList.toggle("active", which === "history");
+  if (which === "history") $("history").scrollIntoView({ behavior: "smooth" });
+}
+
+grabDatFoo(); // auto-grab on load
+</script>
+</body>
+</html>
